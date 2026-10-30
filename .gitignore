@@ -22,3 +22,6 @@ next-env.d.ts
 
 # logos originales generados con IA (los derivados se generan con npm run brand)
 /Gemini_*
+
+# chunk local pool state
+.chunk/*-pool.json

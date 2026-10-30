@@ -1,0 +1,50 @@
+{
+  "commands": [
+    {
+      "name": "install",
+      "run": "npm ci",
+      "remote": true
+    },
+    {
+      "name": "test",
+      "run": "npx vitest run --reporter=default --reporter=junit --outputFile.junit=reports/unit/junit.xml",
+      "role": "gate",
+      "timeout": 300,
+      "remote": true
+    },
+    {
+      "name": "lint",
+      "run": "npm run lint",
+      "role": "gate",
+      "timeout": 60,
+      "remote": true
+    }
+  ],
+  "vcs": {
+    "org": "guatafa3000-boop",
+    "repo": "michimax"
+  },
+  "validation": {
+    "sidecarImage": "7c029f13-0780-400e-a5cc-c408bf7f8f4a"
+  },
+  "orgID": "8d61e4cf-ee8d-4b07-8c39-749fa89f8a73",
+  "environment": {
+    "stack": "javascript",
+    "setup": [
+      {
+        "name": "system",
+        "command": "curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs --no-install-recommends && sudo rm -rf /var/lib/apt/lists/*"
+      },
+      {
+        "name": "install",
+        "command": "npm install"
+      },
+      {
+        "name": "playwright-install",
+        "command": "npx playwright install --with-deps"
+      }
+    ],
+    "image": "cimg/node",
+    "image_version": "22.23"
+  }
+}
