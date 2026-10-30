@@ -1,0 +1,133 @@
+.clip {
+  position: relative;
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+  background: #000;
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 6rem;
+  color: var(--color-accent);
+  pointer-events: none;
+  animation: burst 0.8s ease-out forwards;
+}
+
+@keyframes burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -80%) scale(1);
+  }
+}
+
+.info {
+  position: absolute;
+  left: 0;
+  right: 72px;
+  bottom: 4px;
+  padding: var(--space-8) var(--space-4) var(--space-4);
+  background: linear-gradient(to top, rgb(0 0 0 / 0.75), transparent);
+}
+
+.title {
+  margin: 0 0 var(--space-1);
+  font-size: 1.5rem;
+  text-shadow: 0 1px 4px rgb(0 0 0 / 0.6);
+}
+
+.meta {
+  margin: 0 0 var(--space-3);
+  font-size: 0.9rem;
+}
+
+.match {
+  color: var(--color-gold);
+  font-weight: 700;
+}
+
+.watch {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-gold);
+  color: var(--color-on-gold);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.actions {
+  position: absolute;
+  right: var(--space-3);
+  bottom: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.action {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.5);
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.action:active {
+  transform: scale(0.9);
+}
+
+.liked {
+  color: var(--color-accent);
+}
+
+.progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: rgb(255 255 255 / 0.25);
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-accent);
+  transform-origin: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burst {
+    animation: none;
+    opacity: 0.9;
+    transform: translate(-50%, -50%);
+  }
+}

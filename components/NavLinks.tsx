@@ -6,6 +6,7 @@ import styles from "./SiteHeader.module.css";
 
 const links = [
   { href: "/", label: "Inicio" },
+  { href: "/para-ti", label: "Para ti" },
   { href: "/solicitudes", label: "Solicitudes" },
 ];
 
