@@ -2,11 +2,24 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { CLIP_CAPTIONS_PATH, clipPath, getCategory, stillPath, type Show } from "@/lib/catalog";
+import {
+  CLIP_CAPTIONS_PATH,
+  clipPath,
+  getCategory,
+  stillPath,
+  type Show,
+} from "@/lib/catalog";
 import { CommentsSheet } from "./CommentsSheet";
 import styles from "./FeedClip.module.css";
 
 const DOUBLE_TAP_MS = 300;
+
+/** Quien pidió menos movimiento en su sistema no recibe reproducción automática. */
+function prefersReducedMotion(): boolean {
+  return (
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+  );
+}
 
 /** Un clip del feed «Para ti»: se reproduce solo cuando ocupa la pantalla y se pausa al salir. */
 export function FeedClip({ show }: { show: Show }) {
@@ -17,11 +30,16 @@ export function FeedClip({ show }: { show: Show }) {
   const [liked, setLiked] = useState(false);
   const [burst, setBurst] = useState(0);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     const section = sectionRef.current;
     const video = videoRef.current;
-    if (!section || !video || typeof IntersectionObserver === "undefined") return;
+    if (!section || !video) return;
+    const reduced = prefersReducedMotion();
+    setReducedMotion(reduced);
+    if (reduced || typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
@@ -35,6 +53,13 @@ export function FeedClip({ show }: { show: Show }) {
     observer.observe(section);
     return () => observer.disconnect();
   }, []);
+
+  function togglePlayback() {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) video.play()?.catch(() => undefined);
+    else video.pause();
+  }
 
   function handleTap() {
     const now = Date.now();
@@ -54,7 +79,9 @@ export function FeedClip({ show }: { show: Show }) {
           ref={videoRef}
           className={styles.video}
           muted
-          loop
+          loop={!reducedMotion}
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
           playsInline
           preload="metadata"
           poster={stillPath(show.slug)}
@@ -65,7 +92,13 @@ export function FeedClip({ show }: { show: Show }) {
           }}
         >
           <source src={clipPath(show.slug)} type="video/mp4" />
-          <track kind="captions" src={CLIP_CAPTIONS_PATH} srcLang="es-MX" label="Español (México)" default />
+          <track
+            kind="captions"
+            src={CLIP_CAPTIONS_PATH}
+            srcLang="es-MX"
+            label="Español (México)"
+            default
+          />
         </video>
         {burst > 0 && (
           <span key={burst} className={styles.burst} aria-hidden="true">
@@ -77,7 +110,8 @@ export function FeedClip({ show }: { show: Show }) {
       <div className={styles.info}>
         <h2 className={styles.title}>{show.title}</h2>
         <p className={styles.meta}>
-          {getCategory(show.category).name} · <span className={styles.match}>{show.match}% de coincidencia</span>
+          {getCategory(show.category).name} ·{" "}
+          <span className={styles.match}>{show.match}% de coincidencia</span>
         </p>
         <Link href={`/titulos/${show.slug}`} className={styles.watch}>
           Ver título
@@ -94,7 +128,24 @@ export function FeedClip({ show }: { show: Show }) {
           <span aria-hidden="true">♥</span>
           <span className="visually-hidden">Me encanta</span>
         </button>
-        <button type="button" className={styles.action} onClick={() => setCommentsOpen(true)}>
+        {reducedMotion && (
+          <button
+            type="button"
+            className={styles.action}
+            aria-pressed={playing}
+            onClick={togglePlayback}
+          >
+            <span aria-hidden="true">{playing ? "❚❚" : "▶"}</span>
+            <span className="visually-hidden">
+              {playing ? "Pausar clip" : "Reproducir clip"}
+            </span>
+          </button>
+        )}
+        <button
+          type="button"
+          className={styles.action}
+          onClick={() => setCommentsOpen(true)}
+        >
           <span aria-hidden="true">💬</span>
           <span className="visually-hidden">Comentarios</span>
         </button>
@@ -108,10 +159,17 @@ export function FeedClip({ show }: { show: Show }) {
         aria-valuemax={100}
         aria-valuenow={Math.round(progress * 100)}
       >
-        <div className={styles.progressFill} style={{ transform: `scaleX(${progress})` }} />
+        <div
+          className={styles.progressFill}
+          style={{ transform: `scaleX(${progress})` }}
+        />
       </div>
 
-      <CommentsSheet title={show.title} open={commentsOpen} onClose={() => setCommentsOpen(false)} />
+      <CommentsSheet
+        title={show.title}
+        open={commentsOpen}
+        onClose={() => setCommentsOpen(false)}
+      />
     </section>
   );
 }
